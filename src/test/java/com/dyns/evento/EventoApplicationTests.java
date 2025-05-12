@@ -1,4 +1,4 @@
-package com.dyn.evento;
+package com.dyns.evento;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
