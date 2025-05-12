@@ -5,6 +5,14 @@ spring:
     password: password
     driver-class-name: org.h2.Driver
 
+  jpa:
+    show-sql: true
+    properties:
+      hibernate:
+        ddl-auto: create-drop
+        validator:
+          apply_to_ddl: true
+
   sql:
     init:
       mode: always
