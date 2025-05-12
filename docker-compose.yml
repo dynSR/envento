@@ -1,0 +1,21 @@
+services:
+  db:
+    image: postgres:latest
+    container_name: evento-postgres-db
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "${DB_PORT}:5432"
+
+  adminer:
+    image: adminer:latest
+    container_name: evento-adminer
+    restart: always
+    ports:
+      - "8888:8080"
+
+volumes:
+  db-data: { }
