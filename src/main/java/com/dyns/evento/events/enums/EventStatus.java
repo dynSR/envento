@@ -2,7 +2,7 @@ package com.dyns.evento.events.enums;
 
 public enum EventStatus {
     /**
-     * Default status — not visible by users.
+     * Default status — not visible by users, only by the creator.
      */
     DRAFT,
 

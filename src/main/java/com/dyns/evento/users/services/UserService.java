@@ -1,8 +1,8 @@
 package com.dyns.evento.users.services;
 
-import com.dyns.evento.exceptions.NotFoundException;
-import com.dyns.evento.generic.GenericService;
+import com.dyns.evento.error.exceptions.NotFoundException;
 import com.dyns.evento.users.User;
+import com.dyns.evento.utils.ClassUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,66 +13,63 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements GenericService<User, UUID> {
+public class UserService {
     private final UserRepository repository;
 
     @Transactional
-    @Override
-    public User create(User input) {
+    public User save(User input) {
         return repository.save(input);
     }
 
     @Transactional(readOnly = true)
-    @Override
-    public User getById(UUID uuid) {
+    public User findById(UUID uuid) {
         return repository.findById(uuid)
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(User.class)));
     }
 
     @Transactional(readOnly = true)
-    @Override
-    public Collection<? extends User> getAll() {
+    public Collection<? extends User> findAll() {
         return repository.findAll();
     }
 
     @Transactional
-    @Override
-    public User edit(UUID uuid, User changes) {
+    public User partialUpdate(UUID uuid, User input) {
         return repository.findById(uuid)
-                .map(foundUser -> {
-                    Optional.ofNullable(changes.getEmail()).ifPresent(foundUser::setEmail);
-                    Optional.ofNullable(changes.getFirstName()).ifPresent(foundUser::setFirstName);
-                    Optional.ofNullable(changes.getLastName()).ifPresent(foundUser::setLastName);
-                    Optional.ofNullable(changes.getPassword()).ifPresent(foundUser::setPassword);
-                    Optional.ofNullable(changes.getRegistrations()).ifPresent(foundUser::setRegistrations);
-                    Optional.ofNullable(changes.getEvents()).ifPresent(foundUser::setEvents);
-                    return repository.save(foundUser);
+                .map(updatedUser -> {
+                    Optional.ofNullable(input.getEmail()).ifPresent(updatedUser::setEmail);
+                    Optional.ofNullable(input.getFirstName()).ifPresent(updatedUser::setFirstName);
+                    Optional.ofNullable(input.getLastName()).ifPresent(updatedUser::setLastName);
+                    Optional.ofNullable(input.getRegistrations()).ifPresent(updatedUser::setRegistrations);
+                    Optional.ofNullable(input.getEvents()).ifPresent(updatedUser::setEvents);
+                    return repository.save(updatedUser);
                 })
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(User.class)));
     }
 
     @Transactional
-    @Override
-    public User update(UUID uuid, User update) {
+    public User fullUpdate(UUID uuid, User input) {
         return repository.findById(uuid)
-                .map(foundUser -> {
-                    foundUser.setEmail(update.getEmail());
-                    foundUser.setFirstName(update.getFirstName());
-                    foundUser.setLastName(update.getLastName());
-                    foundUser.setPassword(update.getPassword());
-                    return repository.save(foundUser);
+                .map(updatedUser -> {
+                    updatedUser.setEmail(input.getEmail());
+                    updatedUser.setFirstName(input.getFirstName());
+                    updatedUser.setLastName(input.getLastName());
+                    return repository.save(updatedUser);
                 })
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(User.class)));
     }
 
     @Transactional
-    @Override
     public void delete(UUID uuid) {
         repository.findById(uuid).ifPresentOrElse(
                 repository::delete,
                 () -> {
-                    throw new NotFoundException();
+                    throw new NotFoundException(ClassUtils.getName(User.class));
                 }
         );
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<User> findByEmail(String email) {
+        return repository.findByEmail(email);
     }
 }

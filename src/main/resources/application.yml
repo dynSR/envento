@@ -1,0 +1,54 @@
+spring:
+  application:
+    name: ${APP_NAME}
+    version: ${API_VERSION}
+    api-base-url: "/api/${API_VERSION}"
+
+  jwt:
+    secret: ${JWT_SECRET_KEY}
+    expiration: ${JWT_EXPIRATION}
+
+  server:
+    port: ${SERVER_PORT}
+
+  datasource:
+    url: jdbc:${DB_CONNECTION}://${DB_HOST}:${DB_PORT}/${DB_DATABASE}?currentSchema=${DB_SCHEMA:public}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    initialize: true
+    schema: v1
+
+  #  sql:
+  #    init:
+  #      mode: always # always or never
+  #      schema-location: classpath:init-db.sql
+
+  jpa:
+    show-sql: true
+    generate-ddl: true
+    open-in-view: false
+    hibernate:
+      dialect: org.hibernate.dialect.PostgreSQLDialect
+      ddl-auto: update # update or create-drop or none
+    properties:
+      hibernate:
+        format_sql: true
+        default_schema: ${DB_SCHEMA:public}
+
+  logging:
+    level:
+      org:
+        springframework:
+          security: debug # debug or trace
+
+management:
+  endpoints:
+    web:
+      discovery:
+        enabled: false
+      base-path: /check
+      path-mapping:
+        health: /
+      exposure:
+        include: health

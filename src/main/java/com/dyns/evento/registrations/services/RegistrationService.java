@@ -1,71 +1,69 @@
 package com.dyns.evento.registrations.services;
 
-import com.dyns.evento.exceptions.NotFoundException;
-import com.dyns.evento.generic.GenericService;
+import com.dyns.evento.error.exceptions.NotFoundException;
+import com.dyns.evento.events.Event;
+import com.dyns.evento.events.services.EventRepository;
 import com.dyns.evento.registrations.Registration;
+import com.dyns.evento.registrations.enums.RegistrationStatus;
+import com.dyns.evento.users.User;
+import com.dyns.evento.users.services.UserRepository;
+import com.dyns.evento.utils.ClassUtils;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class RegistrationService implements GenericService<Registration, UUID> {
+public class RegistrationService {
     private final RegistrationRepository repository;
+    private final UserRepository userRepository;
+    private final EventRepository eventRepository;
 
+    // Maybe type more specifically the UUIDs to make sure they are respectively
+    // UserUUID and EventUUID
     @Transactional
-    @Override
-    public Registration create(Registration input) {
-        return repository.save(input);
+    public Registration save(
+            @NotNull UUID userId,
+            @NotNull UUID eventId
+    ) {
+        Registration registration = Registration.builder()
+                .status(RegistrationStatus.CONFIRMED)
+                .createdAt(LocalDateTime.now())
+                .build();
+
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(User.class)));
+        registration.setUser(user);
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(Event.class)));
+        registration.setEvent(event);
+
+        return repository.save(registration);
     }
 
     @Transactional(readOnly = true)
-    @Override
-    public Registration getById(UUID uuid) {
+    public Registration findById(UUID uuid) {
         return repository.findById(uuid)
-                .orElseThrow(NotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(Registration.class)));
     }
 
     @Transactional(readOnly = true)
-    @Override
-    public Collection<? extends Registration> getAll() {
+    public Collection<? extends Registration> findAll() {
         return repository.findAll();
     }
 
     @Transactional
-    @Override
-    public Registration edit(UUID uuid, Registration changes) {
-        return repository.findById(uuid)
-                .map(registration -> {
-                    Optional.ofNullable(changes.getStatus()).ifPresent(registration::setStatus);
-                    Optional.ofNullable(changes.getCreatedAt()).ifPresent(registration::setCreatedAt);
-                    return repository.save(registration);
-                })
-                .orElseThrow(NotFoundException::new);
-    }
-
-    @Transactional
-    @Override
-    public Registration update(UUID uuid, Registration update) {
-        return repository.findById(uuid)
-                .map(registration -> {
-                    registration.setStatus(update.getStatus());
-                    registration.setCreatedAt(update.getCreatedAt());
-                    return repository.save(registration);
-                })
-                .orElseThrow(NotFoundException::new);
-    }
-
-    @Transactional
-    @Override
     public void delete(UUID uuid) {
         repository.findById(uuid).ifPresentOrElse(
                 repository::delete,
                 () -> {
-                    throw new NotFoundException();
+                    throw new NotFoundException(ClassUtils.getName(Registration.class));
                 }
         );
     }

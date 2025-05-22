@@ -1,7 +1,7 @@
 services:
   db:
     image: postgres:latest
-    container_name: evento-postgres-db
+    container_name: envento-postgres-db
     restart: always
     environment:
       POSTGRES_DB: ${DB_DATABASE}
@@ -9,13 +9,15 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
       - "${DB_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
 
   adminer:
     image: adminer:latest
-    container_name: evento-adminer
+    container_name: envento-adminer
     restart: always
     ports:
       - "8888:8080"
 
 volumes:
-  db-data: { }
+  pgdata:

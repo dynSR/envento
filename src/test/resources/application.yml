@@ -1,4 +1,11 @@
 spring:
+  application:
+    api-base-url: "/api/v1"
+
+  jwt:
+    secret: my-32-character-ultra-secure-and-ultra-long-secret
+    expiration: 3600000
+
   datasource:
     url: jdbc:h2:mem:testdb;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
     username: sa
@@ -16,3 +23,8 @@ spring:
   sql:
     init:
       mode: always
+
+  logging:
+    level:
+      root: INFO
+      org.springframework.test.context: DEBUG

@@ -1,6 +1,8 @@
 package com.dyns.evento.registrations.dtos;
 
+import com.dyns.evento.events.dtos.EventDto;
 import com.dyns.evento.registrations.enums.RegistrationStatus;
+import com.dyns.evento.users.dtos.UserDto;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,6 +19,6 @@ public class RegistrationDto {
     private UUID id = UUID.randomUUID();
     private LocalDateTime createdAt = LocalDateTime.now();
     private RegistrationStatus status = RegistrationStatus.CONFIRMED;
-//    private List<UserDto> users = new ArrayList<>();
-//    private List<EventDto> events = new ArrayList<>();
+    private UserDto user;
+    private EventDto event;
 }
