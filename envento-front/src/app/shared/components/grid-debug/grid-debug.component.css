@@ -1,0 +1,16 @@
+.grid-debug-inspector {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--spacing-md);
+  width: 192px;
+  height: 100dvh;
+  position: absolute;
+  right: 0;
+  padding: var(--spacing-md-plus);
+  border: solid 1px black;
+  bg-dark-opacity: 10%;
+  background-color: var(--bg-dark);
+  font-size: 0.65rem;
+  z-index: 20;
+}

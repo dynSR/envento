@@ -1,0 +1,79 @@
+/* Extra small */
+@property --spacing-xs {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 2px;
+}
+@property --spacing-sm {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 4px;
+}
+
+/* Small */
+@property --spacing-md {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 8px;
+}
+@property --spacing-md-plus {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 12px;
+}
+
+/* Medium */
+@property --spacing-lg {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 16px;
+}
+@property --spacing-lg-plus {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 20px;
+}
+@property --spacing-lg-x {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 24px;
+}
+
+/* Large */
+@property --spacing-xl {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 32px;
+}
+@property --spacing-xl-plus {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 40px;
+}
+@property --spacing-xl-x {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 48px;
+}
+
+/* Extra Large */
+@property --spacing-2xl {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 72px;
+}
+@property --spacing-3xl {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 96px;
+}
+@property --spacing-4xl {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 124px;
+}
+@property --spacing-5xl {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 160px;
+}
