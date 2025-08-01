@@ -9,11 +9,11 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -23,6 +23,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -36,9 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
-        final String token;
-        final String userIdentifier;
+        String authHeader = request.getHeader("Authorization");
+        String token;
+        String userIdentifier;
 
         if (doesHeaderStartsWithBearer(authHeader)) {
             filterChain.doFilter(request, response);
@@ -58,7 +59,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .status(HttpStatus.UNAUTHORIZED)
                     .message("Authentication token is invalid or expired.")
                     .build();
-
             response.getWriter()
                     .write(mapper.writeValueAsString(error));
         }
@@ -68,10 +68,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return header == null || !header.startsWith("Bearer ");
     }
 
-    private void authenticateUser(HttpServletRequest request, String userIdentifier, String token) {
-        if (userIdentifier == null || isUserAlreadyAuthenticated(userIdentifier)) return;
-
-        final UserDetails userDetails = this.userDetailsService.loadUserByUsername(userIdentifier);
+    private void authenticateUser(
+            HttpServletRequest request,
+            String userIdentifier,
+            String token
+    ) {
+        UserDetails userDetails = this.userDetailsService.loadUserByUsername(userIdentifier);
         if (!jwtService.isTokenValid(token, userDetails)) return;
 
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
@@ -83,12 +85,5 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 new WebAuthenticationDetailsSource().buildDetails(request)
         );
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-    }
-
-    private boolean isUserAlreadyAuthenticated(String userIdentifier) {
-        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null
-                && authentication.isAuthenticated()
-                && authentication.getName().equals(userIdentifier);
     }
 }

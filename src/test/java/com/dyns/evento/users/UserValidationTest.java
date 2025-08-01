@@ -47,11 +47,23 @@ public class UserValidationTest {
         validator = factory.getValidator();
     }
 
-    @Test
-    void shouldFailValidation_whenEmailIsInvalid() {
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "plainaddress",
+            "@missinglocal.com",
+            ".dotstart@domain.com",
+            "dotend.@domain.com",
+            "double..dot@domain.com",
+            "user name@domain.com",
+            "user@domain_com.com",
+            "user@domain.c",
+            "user@domain.123",
+            "user@-domain.com",
+    })
+    void shouldFailEmailValidation(String email) {
         // Given
         User user = fixture.getOne();
-        user.setEmail("invalid-email");
+        user.setEmail(email);
 
         // When & Then
         Set<ConstraintViolation<User>> violations = validator.validate(user);

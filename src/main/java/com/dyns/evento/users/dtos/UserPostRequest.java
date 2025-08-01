@@ -1,6 +1,7 @@
 package com.dyns.evento.users.dtos;
 
 import com.dyns.evento.users.utils.UserValidationConstraints;
+import com.dyns.evento.utils.GeneralConstraints;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -21,6 +22,14 @@ public class UserPostRequest {
             message = UserValidationConstraints.INVALID_EMAIL_MESSAGE
     )
     private String email;
+
+    @NotBlank
+    @Size(max = UserValidationConstraints.ALIAS_MAX_LENGTH)
+    @Pattern(
+            regexp = GeneralConstraints.SAFE_TEXT_PATTERN,
+            message = GeneralConstraints.INVALID_SAFE_TEXT_MESSAGE
+    )
+    private String alias;
 
     @NotBlank
     @Size(max = UserValidationConstraints.FIRST_NAME_MAX_LENGTH)

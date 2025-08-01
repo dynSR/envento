@@ -149,8 +149,11 @@ public class ExceptionResolver {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handle(
             Exception exception
-    ) {
-        log.info("Caught Exception: {}", exception.getMessage());
+) {
+        log.info(
+                "Caught Exception: ",
+                exception
+        );
 
         var error = ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)

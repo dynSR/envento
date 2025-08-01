@@ -135,7 +135,6 @@ public class EventValidationTest {
         Set<ConstraintViolation<Event>> violations = validator.validate(event);
 
         // Then
-        ;
         log.info("{}: {}", propertyName, violations.iterator().next().getMessage());
         assertFalse(violations.isEmpty());
         assertEquals(propertyName, violations.iterator().next().getPropertyPath().toString());

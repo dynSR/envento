@@ -30,7 +30,7 @@ spring:
     open-in-view: false
     hibernate:
       dialect: org.hibernate.dialect.PostgreSQLDialect
-      ddl-auto: update # update or create-drop or none
+      ddl-auto: create-drop # update or create-drop or none
     properties:
       hibernate:
         format_sql: true

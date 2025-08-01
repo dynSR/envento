@@ -4,10 +4,9 @@ import com.dyns.evento.error.exceptions.NotFoundException;
 import com.dyns.evento.events.Event;
 import com.dyns.evento.events.enums.EventStatus;
 import com.dyns.evento.events.utils.EventValidationConstraints;
+import com.dyns.evento.generics.AbstractService;
 import com.dyns.evento.users.User;
 import com.dyns.evento.users.services.UserRepository;
-import com.dyns.evento.utils.ClassUtils;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,45 +17,44 @@ import java.util.UUID;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
-public class EventService {
-    private final EventRepository repository;
+public class EventService extends AbstractService<Event, UUID, EventRepository> {
     private final UserRepository userRepository;
 
+    public EventService(
+            EventRepository repository,
+            UserRepository userRepository
+    ) {
+        super(repository);
+        this.userRepository = userRepository;
+    }
+
     @Transactional
-    public Event save(UUID userId, Event input) {
-        validateEventDates(input);
+    public Event save(
+            UUID userId,
+            Event input
+    ) {
+        EventValidationConstraints.validateEventDates(input);
 
         User creator = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(User.class)));
+                .orElseThrow(() -> new NotFoundException(className));
         input.setCreator(creator);
         input.setStatus(EventStatus.DRAFT);
         return repository.save(input);
     }
 
     @Transactional(readOnly = true)
-    public Event findById(UUID uuid) {
-        return repository.findById(uuid)
-                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(Event.class)));
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<? extends Event> findAll() {
-        return repository.findAll();
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<? extends Event> findByCreator(
-            UUID userId
-    ) {
+    public Collection<? extends Event> findByCreator(UUID userId) {
         User creator = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(User.class)));
+                .orElseThrow(() -> new NotFoundException(className));
         return repository.findByCreator(creator);
     }
 
-    @Transactional
-    public Event partialUpdate(UUID uuid, Event input) {
-        validateEventDates(input);
+    @Override
+    public Event partialUpdate(
+            UUID uuid,
+            Event input
+    ) {
+        EventValidationConstraints.validateEventDates(input);
         return repository.findById(uuid)
                 .map(foundEvent -> {
                     Optional.ofNullable(input.getTitle()).ifPresent(foundEvent::setTitle);
@@ -68,12 +66,12 @@ public class EventService {
                     Optional.ofNullable(input.getRegistrationDeadline()).ifPresent(foundEvent::setRegistrationDeadline);
                     return repository.save(foundEvent);
                 })
-                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(Event.class)));
+                .orElseThrow(() -> new NotFoundException(className));
     }
 
-    @Transactional
+    @Override
     public Event fullUpdate(UUID uuid, Event input) {
-        validateEventDates(input);
+        EventValidationConstraints.validateEventDates(input);
         return repository.findById(uuid)
                 .map(foundEvent -> {
                     foundEvent.setTitle(input.getTitle());
@@ -85,30 +83,6 @@ public class EventService {
                     foundEvent.setRegistrationDeadline(input.getRegistrationDeadline());
                     return repository.save(foundEvent);
                 })
-                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(Event.class)));
-    }
-
-    @Transactional
-    public void delete(UUID uuid) {
-        repository.findById(uuid).ifPresentOrElse(
-                repository::delete,
-                () -> {
-                    throw new NotFoundException(ClassUtils.getName(Event.class));
-                }
-        );
-    }
-
-    private void validateEventDates(Event input) {
-        if (!input.getEndingDateTime().isAfter(input.getStartingDateTime())) {
-            throw new IllegalArgumentException(EventValidationConstraints.INVALID_ENDING_DATE_MESSAGE);
-        }
-
-        if (input.getRegistrationDeadline().isBefore(input.getStartingDateTime())
-                || input.getRegistrationDeadline().isAfter(input.getEndingDateTime())
-        ) {
-            throw new IllegalArgumentException(
-                    EventValidationConstraints.INVALID_REGISTRATION_DEADLINE_MESSAGE
-            );
-        }
+                .orElseThrow(() -> new NotFoundException(className));
     }
 }

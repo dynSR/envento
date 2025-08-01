@@ -50,12 +50,20 @@ public class Registration implements Identifiable<UUID> {
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(
+            name = "user_id",
+            referencedColumnName = "id",
+            nullable = false
+    )
     private User user;
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "event_id", nullable = false)
+    @JoinColumn(
+            name = "event_id",
+            referencedColumnName = "id",
+            nullable = false
+    )
     private Event event;
 
     @Override

@@ -16,9 +16,9 @@ import java.util.UUID;
 @AllArgsConstructor
 @Builder
 public class RegistrationDto {
-    private UUID id = UUID.randomUUID();
-    private LocalDateTime createdAt = LocalDateTime.now();
-    private RegistrationStatus status = RegistrationStatus.CONFIRMED;
+    private UUID id;
+    private LocalDateTime createdAt;
+    private RegistrationStatus status;
     private UserDto user;
     private EventDto event;
 }

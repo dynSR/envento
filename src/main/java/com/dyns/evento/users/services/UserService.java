@@ -1,35 +1,36 @@
 package com.dyns.evento.users.services;
 
 import com.dyns.evento.error.exceptions.NotFoundException;
+import com.dyns.evento.generics.AbstractService;
+import com.dyns.evento.roles.RoleName;
 import com.dyns.evento.users.User;
-import com.dyns.evento.utils.ClassUtils;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
-@RequiredArgsConstructor
-public class UserService {
-    private final UserRepository repository;
+public class UserService extends AbstractService<User, UUID, UserRepository> {
+    public UserService(UserRepository repository) {
+        super(repository);
+    }
 
     @Transactional
+    @Override
     public User save(User input) {
-        return repository.save(input);
-    }
-
-    @Transactional(readOnly = true)
-    public User findById(UUID uuid) {
-        return repository.findById(uuid)
-                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(User.class)));
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<? extends User> findAll() {
-        return repository.findAll();
+        try {
+            input.setEnabled(true);
+            input.setVerified(false);
+            input.setRole(RoleName.ROLE_USER);
+            return super.save(input);
+        }
+        catch(Exception exception) {
+            log.info(exception.getCause().getMessage());
+            throw exception;
+        }
     }
 
     @Transactional
@@ -37,13 +38,12 @@ public class UserService {
         return repository.findById(uuid)
                 .map(updatedUser -> {
                     Optional.ofNullable(input.getEmail()).ifPresent(updatedUser::setEmail);
+                    Optional.ofNullable(input.getAlias()).ifPresent(updatedUser::setAlias);
                     Optional.ofNullable(input.getFirstName()).ifPresent(updatedUser::setFirstName);
                     Optional.ofNullable(input.getLastName()).ifPresent(updatedUser::setLastName);
-                    Optional.ofNullable(input.getRegistrations()).ifPresent(updatedUser::setRegistrations);
-                    Optional.ofNullable(input.getEvents()).ifPresent(updatedUser::setEvents);
                     return repository.save(updatedUser);
                 })
-                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(User.class)));
+                .orElseThrow(() -> new NotFoundException(className));
     }
 
     @Transactional
@@ -51,21 +51,12 @@ public class UserService {
         return repository.findById(uuid)
                 .map(updatedUser -> {
                     updatedUser.setEmail(input.getEmail());
+                    updatedUser.setAlias(input.getAlias());
                     updatedUser.setFirstName(input.getFirstName());
                     updatedUser.setLastName(input.getLastName());
                     return repository.save(updatedUser);
                 })
-                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(User.class)));
-    }
-
-    @Transactional
-    public void delete(UUID uuid) {
-        repository.findById(uuid).ifPresentOrElse(
-                repository::delete,
-                () -> {
-                    throw new NotFoundException(ClassUtils.getName(User.class));
-                }
-        );
+                .orElseThrow(() -> new NotFoundException(className));
     }
 
     @Transactional(readOnly = true)

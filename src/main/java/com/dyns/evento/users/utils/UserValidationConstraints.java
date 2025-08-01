@@ -5,6 +5,7 @@ package com.dyns.evento.users.utils;
  * <a href="https://owasp.org/www-community/OWASP_Validation_Regex_Repository">OWASP Validation Regex Repository</a>
  */
 public final class UserValidationConstraints {
+    public static final int ALIAS_MAX_LENGTH = 50;
     public static final int FIRST_NAME_MAX_LENGTH = 80;
     public static final int LAST_NAME_MAX_LENGTH = 150;
     public static final int PASSWORD_MIN_LENGTH = 12;

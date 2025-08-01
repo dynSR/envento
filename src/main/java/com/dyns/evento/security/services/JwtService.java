@@ -38,8 +38,8 @@ public class JwtService {
     }
 
     public String generateToken(
-            @NotNull Map<String, Object> extraClaims,
-            @NotNull UserDetails userDetails
+            Map<String, Object> extraClaims,
+            UserDetails userDetails
     ) {
         return Jwts.builder()
                 .setClaims(extraClaims)
@@ -60,8 +60,8 @@ public class JwtService {
     }
 
     public boolean isTokenValid(
-            @NotNull String token,
-            @NotNull UserDetails userDetails
+            String token,
+            UserDetails userDetails
     ) {
         final String userIdentifier = extractIdentifier(token);
         return (userIdentifier.equals(userDetails.getUsername())) && !isTokenExpired(token);

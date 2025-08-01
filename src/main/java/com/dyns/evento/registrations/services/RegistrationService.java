@@ -3,26 +3,33 @@ package com.dyns.evento.registrations.services;
 import com.dyns.evento.error.exceptions.NotFoundException;
 import com.dyns.evento.events.Event;
 import com.dyns.evento.events.services.EventRepository;
+import com.dyns.evento.generics.AbstractService;
 import com.dyns.evento.registrations.Registration;
 import com.dyns.evento.registrations.enums.RegistrationStatus;
 import com.dyns.evento.users.User;
 import com.dyns.evento.users.services.UserRepository;
 import com.dyns.evento.utils.ClassUtils;
 import jakarta.validation.constraints.NotNull;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
-public class RegistrationService {
-    private final RegistrationRepository repository;
+public class RegistrationService extends AbstractService<Registration, UUID, RegistrationRepository> {
     private final UserRepository userRepository;
     private final EventRepository eventRepository;
+
+    public RegistrationService(
+            RegistrationRepository repository,
+            UserRepository userRepository,
+            EventRepository eventRepository
+    ) {
+        super(repository);
+        this.userRepository = userRepository;
+        this.eventRepository = eventRepository;
+    }
 
     // Maybe type more specifically the UUIDs to make sure they are respectively
     // UserUUID and EventUUID
@@ -44,27 +51,21 @@ public class RegistrationService {
                 .orElseThrow(() -> new NotFoundException(ClassUtils.getName(Event.class)));
         registration.setEvent(event);
 
-        return repository.save(registration);
+        return super.save(registration);
     }
 
-    @Transactional(readOnly = true)
-    public Registration findById(UUID uuid) {
+    @Override
+    public Registration partialUpdate(UUID uuid, Registration input) {
+        return fullUpdate(uuid, input);
+    }
+
+    @Override
+    public Registration fullUpdate(UUID uuid, Registration input) {
         return repository.findById(uuid)
-                .orElseThrow(() -> new NotFoundException(ClassUtils.getName(Registration.class)));
-    }
-
-    @Transactional(readOnly = true)
-    public Collection<? extends Registration> findAll() {
-        return repository.findAll();
-    }
-
-    @Transactional
-    public void delete(UUID uuid) {
-        repository.findById(uuid).ifPresentOrElse(
-                repository::delete,
-                () -> {
-                    throw new NotFoundException(ClassUtils.getName(Registration.class));
-                }
-        );
+                .map(updatedRegistration -> {
+                    updatedRegistration.setStatus(input.getStatus());
+                    return repository.save(updatedRegistration);
+                })
+                .orElseThrow(() -> new NotFoundException(className));
     }
 }

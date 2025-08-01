@@ -7,11 +7,13 @@ import com.dyns.evento.security.dtos.RegisterRequest;
 import com.dyns.evento.users.User;
 import com.dyns.evento.users.services.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -21,21 +23,22 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        final User user = User.builder()
+        User user = User.builder()
                 .id(null)
+                .email(request.getEmail())
+                .alias(request.getAlias())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
-                .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
         userService.save(user);
 
-        final String jwtToken = jwtService.generateToken(user);
+        String jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        final User user = userService.findByEmail(request.getEmail())
+        User user = userService.findByEmail(request.getEmail())
                 .orElseThrow(InvalidCredentialsException::new);
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -44,7 +47,7 @@ public class AuthenticationService {
                 )
         );
 
-        final String jwtToken = jwtService.generateToken(user);
+        String jwtToken = jwtService.generateToken(user);
         return new AuthenticationResponse(jwtToken);
     }
 

@@ -12,10 +12,15 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Check;
+import org.hibernate.annotations.Checks;
 import org.hibernate.annotations.NaturalId;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -23,6 +28,11 @@ import java.util.*;
 @Builder
 @Entity
 @Table(name = "events")
+//@Checks({
+//        @Check(name = "", constraints = ""),
+//        @Check(name = "", constraints = ""),
+//        @Check(name = "", constraints = "")
+//})
 public class Event implements Identifiable<UUID> {
     @PreRemove
     private void onPreRemove() {
@@ -78,7 +88,11 @@ public class Event implements Identifiable<UUID> {
 
     @NotNull
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(
+            name = "user_id",
+            referencedColumnName = "id",
+            nullable = false
+    )
     private User creator;
 
     @OneToMany(
@@ -86,6 +100,7 @@ public class Event implements Identifiable<UUID> {
             cascade = CascadeType.REMOVE,
             orphanRemoval = true
     )
+    @Builder.Default
     private Set<Registration> registrations = new HashSet<>();
 
     @Override
@@ -136,7 +151,7 @@ public class Event implements Identifiable<UUID> {
 
     @Override
     public String toString() {
-        return "Event{" +
+        return "Event: {" +
                 "id=" + id +
                 ", title='" + title + '\'' +
                 ", description='" + description + '\'' +
@@ -157,14 +172,5 @@ public class Event implements Identifiable<UUID> {
     public void removeRegistration(Registration registration) {
         if (!registrations.contains(registration)) return;
         registrations.removeIf(r -> r.getId().equals(registration.getId()));
-    }
-
-    public void batchRemoveRegistration(Collection<Registration> batch) {
-        registrations.removeAll(batch);
-    }
-
-    public void clearRegistrations() {
-        if (registrations.isEmpty()) return;
-        registrations.clear();
     }
 }
